@@ -1,0 +1,527 @@
+﻿<Window x:Class="PCBVisualizer3D.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:h="http://helix-toolkit.org/wpf"
+        Title="PCB Visualizer 3D" 
+        Width="1000" Height="600"
+        MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen" 
+        Background="#FF2C2C2C">
+
+    <Window.Resources>
+        <!-- Define color palette for the application -->
+        <Color x:Key="ColorPrimary">#FF007ACC</Color>
+        <Color x:Key="ColorAccent">#FF2896FF</Color>
+        <Color x:Key="ColorPanelBackground">#FF353535</Color>
+        <Color x:Key="ColorTextNormal">#FFDDDDDD</Color>
+        <Color x:Key="ColorTextSecondary">#FFAAAAAA</Color>
+        <Color x:Key="ColorTextHighlight">#FFFFFFFF</Color>
+        <Color x:Key="ColorBorder">#FF444444</Color>
+
+        <!-- Brushes based on the color palette -->
+        <SolidColorBrush x:Key="BrushPrimary" Color="{StaticResource ColorPrimary}" />
+        <SolidColorBrush x:Key="BrushAccent" Color="{StaticResource ColorAccent}" />
+        <SolidColorBrush x:Key="BrushPanelBackground" Color="{StaticResource ColorPanelBackground}" />
+        <SolidColorBrush x:Key="BrushTextNormal" Color="{StaticResource ColorTextNormal}" />
+        <SolidColorBrush x:Key="BrushTextSecondary" Color="{StaticResource ColorTextSecondary}" />
+        <SolidColorBrush x:Key="BrushTextHighlight" Color="{StaticResource ColorTextHighlight}" />
+        <SolidColorBrush x:Key="BrushBorder" Color="{StaticResource ColorBorder}" />
+
+        <!-- Style for general panels with rounded corners and shadows -->
+        <Style x:Key="PanelBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BrushPanelBackground}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect 
+                        Color="Black"
+                        BlurRadius="6"
+                        ShadowDepth="2"
+                        Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button style for consistent appearance across the app -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushTextHighlight}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BrushPrimary}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="4"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <!-- Change appearance on hover -->
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource BrushAccent}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BrushAccent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style for text headers -->
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushTextHighlight}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Style for secondary text elements -->
+        <Style x:Key="SubHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+        </Style>
+
+        <!-- Menu style for the top menu bar -->
+        <Style x:Key="ModernMenuStyle" TargetType="Menu">
+            <Setter Property="Background" Value="#FF2C2C2C"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FF444444"/>
+        </Style>
+        
+        <!-- Context menu style -->
+        <Style x:Key="ModernContextMenuStyle" TargetType="ContextMenu">
+            <Setter Property="Background" Value="#FF2C2C2C"/>
+            <Setter Property="BorderBrush" Value="#FF444444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+
+        <!-- Menu item style -->
+        <Style x:Key="ModernMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Background" Value="#FF2C2C2C"/>
+            <Setter Property="Foreground" Value="#FFDDDDDD"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#FF444444"/>
+                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="#FF666666"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Separator style for menus -->
+        <Style TargetType="Separator">
+            <Setter Property="Background" Value="#FF444444"/>
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+
+    </Window.Resources>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- Top button-based panel -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="#FF2C2C2C" Height="50">
+            <Button Content="File" Style="{StaticResource ActionButtonStyle}" Margin="10,5,0,5" Width="80" Click="FileButton_Click" />
+            <Button Content="View" Style="{StaticResource ActionButtonStyle}" Margin="10,5,0,5" Width="80" Click="ViewButton_Click" />
+            <Button Content="Tools" Style="{StaticResource ActionButtonStyle}" Margin="10,5,0,5" Width="80" Click="ToolsButton_Click" />
+            <Button Content="Help" Style="{StaticResource ActionButtonStyle}" Margin="10,5,0,5" Width="80" Click="HelpButton_Click" />
+        </StackPanel>
+
+        <!-- Dropdown popups for menu items -->
+        <Popup x:Name="FilePopup" Placement="Bottom" StaysOpen="False">
+            <Border Background="#FF353535" BorderBrush="#FF444444" BorderThickness="1" CornerRadius="1">
+                <StackPanel>
+                    <Button Content="Load PCB" Style="{StaticResource ActionButtonStyle}" Click="MenuLoadPCB_Click" Margin="5"/>
+                    <Separator Margin="5,0"/>
+                    <Button Content="Exit" Style="{StaticResource ActionButtonStyle}" Click="MenuExit_Click" Margin="5"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="ViewPopup" Placement="Bottom" StaysOpen="False">
+            <Border Background="#FF353535" BorderBrush="#FF444444" BorderThickness="1" CornerRadius="1">
+                <StackPanel>
+                    <Button Content="Reset View" Style="{StaticResource ActionButtonStyle}" Click="ButtonResetView_Click" Margin="5"/>
+                    <Separator Margin="5,0"/>
+                    <Button Content="Zoom In" Style="{StaticResource ActionButtonStyle}" Click="ButtonZoomIn_Click" Margin="5"/>
+                    <Button Content="Zoom Out" Style="{StaticResource ActionButtonStyle}" Click="ButtonZoomOut_Click" Margin="5"/>
+                    <Button Content="Toggle Info Panel" Style="{StaticResource ActionButtonStyle}" Click="ToggleInfoPanel_Click" Margin="5"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+        
+        <Popup x:Name="ToolsPopup" Placement="Bottom" StaysOpen="False">
+            <Border Background="#FF353535" BorderBrush="#FF444444" BorderThickness="1" CornerRadius="1">
+                <StackPanel>
+                    <Button Content="Convert Excel To Json" Style="{StaticResource ActionButtonStyle}" Click="ConvertExcelToJsonButton_Click" Margin="5"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+        
+        <Popup x:Name="HelpPopup" Placement="Bottom" StaysOpen="False">
+            <Border Background="#FF353535" BorderBrush="#FF444444" BorderThickness="1" CornerRadius="1">
+                <StackPanel>
+                    <Button Content="About" Style="{StaticResource ActionButtonStyle}" Click="MenuAbout_Click" Margin="5"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Status bar at the bottom -->
+        <StatusBar DockPanel.Dock="Bottom" 
+           Background="{StaticResource BrushPanelBackground}"
+           Foreground="{StaticResource BrushTextHighlight}"
+           Height="39"
+           Padding="5">
+
+            <!-- Left-aligned elements in the status bar -->
+            <StatusBarItem>
+                <TextBlock FontSize="14" FontWeight="Bold">
+            <Run Text="Ready" />
+                </TextBlock>
+            </StatusBarItem>
+            <Separator Background="{StaticResource BrushBorder}" Width="1" Margin="10,0" />
+            <StatusBarItem>
+                <TextBlock FontSize="14">
+            <Run Text="Mouse Position: " Foreground="{StaticResource BrushTextNormal}" />
+            <Run Text="{Binding MousePosition}" Foreground="{StaticResource BrushTextHighlight}" />
+                </TextBlock>
+            </StatusBarItem>
+            <Separator Background="{StaticResource BrushBorder}" Width="1" Margin="10,0" />
+
+            <!-- Right-aligned elements in the status bar -->
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock FontSize="14" TextAlignment="Right">
+            <Run Text="Zoom Level: " Foreground="{StaticResource BrushTextNormal}" />
+            <Run Text="{Binding ZoomLevel}" Foreground="{StaticResource BrushTextHighlight}" />
+                </TextBlock>
+            </StatusBarItem>
+            <Separator Background="{StaticResource BrushBorder}" Width="1" Margin="10,0" />
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock FontSize="14" TextAlignment="Right">
+            <Run Text="Camera Position: " Foreground="{StaticResource BrushTextNormal}" />
+            <Run Text="{Binding CameraPosition}" Foreground="{StaticResource BrushTextHighlight}" />
+                </TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+
+        <!-- Left control panel for user controls -->
+        <Border DockPanel.Dock="Left"
+                Style="{StaticResource PanelBorderStyle}"
+                Width="300">
+            <StackPanel>
+
+                <!-- Title for the control panel -->
+                <TextBlock Text="Controls &amp; Settings"
+                           FontWeight="Bold"
+                           FontSize="17"
+                           Foreground="{StaticResource BrushTextHighlight}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,10"/>
+
+                <Separator Margin="0,0,0,10"/>
+                
+                <!-- Header for action buttons -->
+                <TextBlock Style="{StaticResource HeaderTextStyle}" 
+                           Text="Actions"/>
+
+                <!-- Button for loading a PCB file -->
+                <Button Content="Load PCB"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Click="ButtonLoadPCB_Click" 
+                        HorizontalAlignment="Center"/>
+                
+                <!-- Button to zoom into the model -->
+                <Button Content="Zoom In"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Click="ButtonZoomIn_Click" 
+                        HorizontalAlignment="Center"/>
+                
+                <!-- Button to zoom out of the model -->
+                <Button Content="Zoom Out"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Click="ButtonZoomOut_Click" 
+                        HorizontalAlignment="Center"/>
+                
+                <!-- Button to reset the camera view -->
+                <Button Content="Reset View"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Click="ButtonResetView_Click" 
+                        HorizontalAlignment="Center"/>
+
+                <Separator Margin="0,10,0,10"/>
+                
+                <!-- Header for offset settings -->
+                <TextBlock Style="{StaticResource HeaderTextStyle}" 
+                           Text="Offset Settings"/>
+                
+                <!-- Offset setting for X-axis -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="X Offset:" 
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"/>
+                    <TextBox Name="XOffsetBox" Width="50" Text="0"/>
+                </StackPanel>
+
+                <!-- Offset setting for Y-axis -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Y Offset:" 
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"/>
+                    <TextBox Name="YOffsetBox" Width="50" Text="0"/>
+                </StackPanel>
+                
+                <!-- Offset setting for Z-axis -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                    <TextBlock Text="Z Offset:" 
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"/>
+                    <TextBox Name="ZOffsetBox" Width="50" Text="0"/>
+                </StackPanel>
+                
+                <!-- Button to apply offset changes -->
+                <Button Content="Apply Offset"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="{StaticResource BrushAccent}"
+                        Click="ApplyOffset_Click" 
+                        HorizontalAlignment="Center"/>
+
+                <Separator Margin="0,10,0,10"/>
+                
+                <!-- Credits and link to the developer -->
+                <TextBlock Foreground="{StaticResource BrushTextSecondary}"
+                           HorizontalAlignment="Center"
+                           Margin="0,10,0,0">
+                    <Run Text="Developed by "/>
+                    <Hyperlink Click="Hyperlink_Click"
+                               Foreground="{StaticResource BrushAccent}">
+                        <Run Text="Selim Birincioğlu"/>
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Right panel displaying component information -->
+        <Border DockPanel.Dock="Right"
+                x:Name="InfoPanelBorder"
+                Style="{StaticResource PanelBorderStyle}"
+                Width="300">
+            <StackPanel>
+                
+                <!-- Title for the info panel -->
+                <TextBlock Text="Component Details"
+                           FontWeight="Bold"
+                           FontSize="17"
+                           Foreground="{StaticResource BrushTextHighlight}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,10"/>
+
+                <Separator Margin="0,0,0,10"/>
+                
+                <!-- Information fields for various component attributes -->
+
+                <!-- Location of the component -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Location:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentLocation"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Type -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Type:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentType"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- (X, Y, R) -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="X,Y,R:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentInfo"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Face -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Face:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentFace"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- KDTEC -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="KDTEC:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentKDTEC"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Customer -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Customer:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentCustomer"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Maker -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Maker:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtComponentMaker"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Description -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Description:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtDescription"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Maker Name -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Maker Name:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtMakerName"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Process -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Process:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtProcess"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <!-- Dimensions -->
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                    <TextBlock Text="Dimensions:"
+                               Width="80"
+                               Foreground="{StaticResource BrushTextNormal}"
+                               FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtDimensions"
+                               Text="--"
+                               Foreground="{StaticResource BrushTextSecondary}"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </StackPanel>
+
+                <Separator Margin="0,10,0,10"/>
+                
+                <!-- Button to reset component selection -->
+                <Button Content="Reset Selection"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="{StaticResource BrushPrimary}"
+                        Click="ButtonResetSelection_Click"
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main 3D viewport for rendering PCB and components -->
+        <Grid Margin="10">
+            <h:HelixViewport3D Name="helixViewport"
+                               ZoomExtentsWhenLoaded="True"
+                               Background="#FF1E1E1E"
+                               MouseDown="HelixViewport_MouseDown">
+                <h:HelixViewport3D.Camera>
+                    <PerspectiveCamera Position="0,0,500"
+                                       LookDirection="0,0,-500"
+                                       UpDirection="0,1,0"
+                                       FieldOfView="45" />
+                </h:HelixViewport3D.Camera>
+                <h:DefaultLights/>
+                <h:GridLinesVisual3D MinorDistance="10"
+                                     MajorDistance="10"
+                                     Thickness="0.5"
+                                     Length="500"
+                                     Fill="Gray" />
+                <h:GridLinesVisual3D MinorDistance="50"
+                                     MajorDistance="50"
+                                     Thickness="1"
+                                     Length="500"
+                                     Fill="DarkGray" />
+            </h:HelixViewport3D>
+        </Grid>
+    </DockPanel>
+</Window>

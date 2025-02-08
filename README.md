@@ -142,6 +142,15 @@ The resulting JSON format will look like this:
 
 ---
 
+## 🖼 Example Screenshots
+
+Below are sample image showing the interface of **PCBVisualizer3D**:
+
+![PCBVisualizer3D Main View](images/pcb_visualizer_main.png)
+*Main interface displaying the 3D PCB visualization.*
+
+---
+
 ## 🗋 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
